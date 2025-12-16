@@ -1,6 +1,6 @@
 /************************************************************************************
  *
- * dwaz (Discord Wrapper API for Zwafriya), A Lightweight Go library for Discord API
+ * goda (Golang Optimized Discord API), A Lightweight Go library for Discord API
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,9 +11,9 @@
  *
  ************************************************************************************/
 
-package dwaz
+package goda
 
 const (
-	LIB_NAME    = "dwaz"
+	LIB_NAME    = "goda"
 	LIB_VERSION = "0.14.5"
 )

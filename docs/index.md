@@ -3,7 +3,7 @@
 layout: home
 
 hero:
-  name: "Dwaz"
+  name: "Goda"
   text: "Discord Wrapper API for Zwafriya"
   tagline: "Fast, feature-rich, and easy to use."
   actions:
@@ -11,14 +11,14 @@ hero:
       text: Get Started
       link: /introduction/getting-started
     - theme: alt
-      text: What is Dwaz?
-      link: /introduction/what-is-dwaz
+      text: What is Goda?
+      link: /introduction/what-is-goda
 
 features:
   - title: Blazing Fast
-    details: Dwaz is designed with performance in mind, making your bots respond quickly and efficiently.
+    details: Goda is designed with performance in mind, making your bots respond quickly and efficiently.
   - title: Extremely Feature-Rich
-    details: From simple message handling to advanced gateway and REST integrations, Dwaz provides everything you need.
+    details: From simple message handling to advanced gateway and REST integrations, Goda provides everything you need.
   - title: Easy to Use
     details: Clean, intuitive Go APIs let you build and scale Discord bots effortlessly.
   - title: Modern & Maintained

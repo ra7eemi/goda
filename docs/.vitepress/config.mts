@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitepress'
 
 export default defineConfig({
-  title: 'Dwaz',
+  title: 'Goda',
   description: 'Discord Wrapper API for Zwafriya for Go.',
 
   locales: {
@@ -12,13 +12,13 @@ export default defineConfig({
       themeConfig: {
         nav: [
           { text: 'Home', link: '/' },
-          { text: 'Introduction', link: 'introduction/what-is-dwaz' }
+          { text: 'Introduction', link: 'introduction/what-is-goda' }
         ],
         sidebar: [
           {
             text: 'Introduction',
             items: [
-              { text: 'What is Dwaz?', link: 'introduction/what-is-dwaz' },
+              { text: 'What is Goda?', link: 'introduction/what-is-goda' },
               { text: 'Getting Started', link: 'introduction/getting-started' }
             ]
           }
@@ -32,13 +32,13 @@ export default defineConfig({
       themeConfig: {
         nav: [
           { text: 'Accueil', link: '/fr/' },
-          { text: 'Introduction', link: '/fr/introduction/what-is-dwaz' }
+          { text: 'Introduction', link: '/fr/introduction/what-is-goda' }
         ],
         sidebar: [
           {
             text: 'Introduction',
             items: [
-              { text: 'Qu\'est-ce que Dwaz ?', link: '/fr/introduction/what-is-dwaz' },
+              { text: 'Qu\'est-ce que Goda ?', link: '/fr/introduction/what-is-goda' },
               { text: 'Guide de démarrage', link: '/fr/introduction/getting-started' }
             ]
           }

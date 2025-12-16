@@ -1,4 +1,4 @@
-package dwaz
+package goda
 
 import (
 	"bytes"

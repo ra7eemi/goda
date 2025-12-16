@@ -1,7 +1,7 @@
 
-# What is Dwaz?
+# What is Goda?
 
-Dwaz is a **Discord API library** for Go, designed to be:
+Goda is a **Discord API library** for Go, designed to be:
 
 - ⚡ **Fast**: Optimized for performance to handle high event loads and large Discord bots smoothly.
 - 🚀 **Feature-Rich**: Supports full Discord API coverage including gateway events, REST endpoints, slash commands, interactions, and more.
@@ -12,9 +12,9 @@ Dwaz is a **Discord API library** for Go, designed to be:
 
 ---
 
-## Why choose Dwaz?
+## Why choose Goda?
 
-Discord bot development in Go often involves choosing between libraries with trade-offs. Dwaz aims to provide:
+Discord bot development in Go often involves choosing between libraries with trade-offs. Goda aims to provide:
 
 - **Complete feature set** without unnecessary complexity
 - **Performance and scalability** for large bots or gateways
@@ -30,7 +30,7 @@ Discord bot development in Go often involves choosing between libraries with tra
 
 ---
 
-Ready to build your next Discord bot with Dwaz?
+Ready to build your next Discord bot with Goda?
 
 👉 [Get Started](/introduction/getting-started)
 

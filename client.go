@@ -1,6 +1,6 @@
 /************************************************************************************
  *
- * dwaz (Discord Wrapper API for Zwafriya), A Lightweight Go library for Discord API
+ * goda (Golang Optimized Discord API), A Lightweight Go library for Discord API
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
@@ -11,7 +11,7 @@
  *
  ************************************************************************************/
 
-package dwaz
+package goda
 
 import (
 	"context"
@@ -33,7 +33,7 @@ import (
 //   - Event dispatching via dispatcher.
 //   - Shard management for scalable Gateway connections.
 //
-// Create a Client using dwaz.New() with desired options, then call Start().
+// Create a Client using goda.New() with desired options, then call Start().
 type Client struct {
 	ctx             context.Context
 	Logger          Logger                    // logger used throughout the client
@@ -58,7 +58,7 @@ type clientOption func(*Client)
 //
 // Usage:
 //
-//	y := dwaz.New(dwaz.WithToken("your_bot_token"))
+//	y := goda.New(goda.WithToken("your_bot_token"))
 //
 // Notes:
 //   - Logs fatal and exits if token is empty or obviously invalid (< 50 chars).
@@ -84,7 +84,7 @@ func WithToken(token string) clientOption {
 //
 // Usage:
 //
-//	y := dwaz.New(dwaz.WithLogger(myLogger))
+//	y := goda.New(goda.WithLogger(myLogger))
 //
 // Logs fatal and exits if logger is nil.
 func WithLogger(logger Logger) clientOption {
@@ -100,7 +100,7 @@ func WithLogger(logger Logger) clientOption {
 //
 // Usage:
 //
-//	y := dwaz.New(dwaz.WithWorkerPool(myWorkerPool))
+//	y := goda.New(goda.WithWorkerPool(myWorkerPool))
 //
 // Logs fatal and exits if workerpool is nil.
 func WithWorkerPool(workerPool WorkerPool) clientOption {
@@ -116,7 +116,7 @@ func WithWorkerPool(workerPool WorkerPool) clientOption {
 //
 // Usage:
 //
-//	y := dwaz.New(dwaz.WithCacheManager(myCacheManager))
+//	y := goda.New(goda.WithCacheManager(myCacheManager))
 //
 // Logs fatal and exits if cacheManager is nil.
 func WithCacheManager(cacheManager CacheManager) clientOption {
@@ -133,7 +133,7 @@ func WithCacheManager(cacheManager CacheManager) clientOption {
 //
 // Usage:
 //
-//	y := dwaz.New(dwaz.WithShardsIdentifyRateLimiter(myRateLimiter))
+//	y := goda.New(goda.WithShardsIdentifyRateLimiter(myRateLimiter))
 //
 // Logs fatal and exits if the provided rateLimiter is nil.
 func WithShardsIdentifyRateLimiter(rateLimiter ShardsIdentifyRateLimiter) clientOption {
@@ -149,11 +149,11 @@ func WithShardsIdentifyRateLimiter(rateLimiter ShardsIdentifyRateLimiter) client
 //
 // Usage:
 //
-//	y := dwaz.New(dwaz.WithIntents(GatewayIntentGuilds, GatewayIntentMessageContent))
+//	y := goda.New(goda.WithIntents(GatewayIntentGuilds, GatewayIntentMessageContent))
 //
 // Also supports bitwise OR usage:
 //
-//	y := dwaz.New(dwaz.WithIntents(GatewayIntentGuilds | GatewayIntentMessageContent))
+//	y := goda.New(goda.WithIntents(GatewayIntentGuilds | GatewayIntentMessageContent))
 func WithIntents(intents ...GatewayIntent) clientOption {
 	var totalIntents GatewayIntent
 	for _, intent := range intents {
@@ -172,10 +172,10 @@ func WithIntents(intents ...GatewayIntent) clientOption {
 //
 // Example:
 //
-//	y := dwaz.New(
-//	    dwaz.WithToken("my_bot_token"),
-//	    dwaz.WithIntents(GatewayIntentGuilds, GatewayIntentMessageContent),
-//	    dwaz.WithLogger(myLogger),
+//	y := goda.New(
+//	    goda.WithToken("my_bot_token"),
+//	    goda.WithIntents(GatewayIntentGuilds, GatewayIntentMessageContent),
+//	    goda.WithLogger(myLogger),
 //	)
 //
 // Defaults:
