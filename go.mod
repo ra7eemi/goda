@@ -1,4 +1,4 @@
-module github.com/marouanesouiri/dwaz
+module github.com/ra7eemi/goda
 
 go 1.22
 
