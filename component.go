@@ -17,8 +17,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-
-	"github.com/bytedance/sonic"
 )
 
 // ComponentType represents the type of a Discord component.
@@ -278,7 +276,7 @@ func (c *ActionRowComponent) UnmarshalJSON(buf []byte) error {
 	}
 
 	var temp tempActionRowComponent
-	if err := sonic.Unmarshal(buf, &temp); err != nil {
+	if err := json.Unmarshal(buf, &temp); err != nil {
 		return err
 	}
 
@@ -310,7 +308,7 @@ var _ json.Marshaler = (*ActionRowComponent)(nil)
 func (c *ActionRowComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeActionRow
 	type NoMethod ActionRowComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // ButtonStyle represents different styles for interactive buttons, each with specific actions and required fields.
@@ -424,7 +422,7 @@ var _ json.Marshaler = (*ButtonComponent)(nil)
 func (c *ButtonComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeButton
 	type NoMethod ButtonComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // SelectOptionStructure represents an option in a StringSelectMenuComponent.
@@ -518,7 +516,7 @@ var _ json.Marshaler = (*StringSelectMenuComponent)(nil)
 func (c *StringSelectMenuComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeStringSelect
 	type NoMethod StringSelectMenuComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // TextInputStyle represents the style of a TextInputComponent.
@@ -590,7 +588,7 @@ var _ json.Marshaler = (*TextInputComponent)(nil)
 func (c *TextInputComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeTextInput
 	type NoMethod TextInputComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // SelectDefaultValueType represents the type of a default value in a select menu component.
@@ -665,7 +663,7 @@ var _ json.Marshaler = (*UserSelectMenuComponent)(nil)
 func (c *UserSelectMenuComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeUserSelect
 	type NoMethod UserSelectMenuComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // RoleSelectMenuComponent represents a role select menu, an interactive component allowing users to select one or more roles in a message.
@@ -721,7 +719,7 @@ var _ json.Marshaler = (*RoleSelectMenuComponent)(nil)
 func (c *RoleSelectMenuComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeRoleSelect
 	type NoMethod RoleSelectMenuComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // MentionableSelectMenuComponent represents a mentionable select menu component.
@@ -761,7 +759,7 @@ var _ json.Marshaler = (*MentionableSelectMenuComponent)(nil)
 func (c *MentionableSelectMenuComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeMentionableSelect
 	type NoMethod MentionableSelectMenuComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // ChannelSelectMenuComponent represents a channel select menu, an interactive component allowing users to select one or more channels in a message.
@@ -823,7 +821,7 @@ var _ json.Marshaler = (*ChannelSelectMenuComponent)(nil)
 func (c *ChannelSelectMenuComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeChannelSelect
 	type NoMethod ChannelSelectMenuComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // SectionComponent is a top-level layout component that contextually associates content with an accessory component.
@@ -865,7 +863,7 @@ func (c *SectionComponent) UnmarshalJSON(buf []byte) error {
 	}
 
 	var temp tempSectionComponent
-	if err := sonic.Unmarshal(buf, &temp); err != nil {
+	if err := json.Unmarshal(buf, &temp); err != nil {
 		return err
 	}
 
@@ -899,7 +897,7 @@ var _ json.Marshaler = (*SectionComponent)(nil)
 func (c *SectionComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeSection
 	type NoMethod SectionComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // TextDisplayComponent is a content component that displays markdown-formatted text, including mentions and emojis.
@@ -926,7 +924,7 @@ var _ json.Marshaler = (*TextDisplayComponent)(nil)
 func (c *TextDisplayComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeTextDisplay
 	type NoMethod TextDisplayComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 type UnfurledMediaItemLoadingState int
@@ -995,7 +993,7 @@ var _ json.Marshaler = (*ThumbnailComponent)(nil)
 func (c *ThumbnailComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeThumbnail
 	type NoMethod ThumbnailComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // MediaGalleryItem represents an item in a MediaGallery component.
@@ -1050,7 +1048,7 @@ var _ json.Marshaler = (*MediaGalleryComponent)(nil)
 func (c *MediaGalleryComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeMediaGallery
 	type NoMethod MediaGalleryComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // FileComponent is a top-level content component that displays an uploaded file as an attachment to the message.
@@ -1086,7 +1084,7 @@ var _ json.Marshaler = (*FileComponent)(nil)
 func (c *FileComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeFile
 	type NoMethod FileComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 type SeperatorComponentSpacing int
@@ -1130,7 +1128,7 @@ var _ json.Marshaler = (*SeparatorComponent)(nil)
 func (c *SeparatorComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeSeparator
 	type NoMethod SeparatorComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // ContainerComponent is a top-level layout component that visually encapsulates a collection of child components with an optional customizable accent color bar.
@@ -1183,7 +1181,7 @@ func (c *ContainerComponent) UnmarshalJSON(buf []byte) error {
 	}
 
 	var temp tempContainerComponent
-	if err := sonic.Unmarshal(buf, &temp); err != nil {
+	if err := json.Unmarshal(buf, &temp); err != nil {
 		return err
 	}
 
@@ -1213,7 +1211,7 @@ var _ json.Marshaler = (*ContainerComponent)(nil)
 func (c *ContainerComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeContainer
 	type NoMethod ContainerComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // LabelComponent is a top-level layout component that wraps modal components with a label and an optional description.
@@ -1264,7 +1262,7 @@ func (c *LabelComponent) UnmarshalJSON(buf []byte) error {
 	}
 
 	var temp tempLabelComponent
-	if err := sonic.Unmarshal(buf, &temp); err != nil {
+	if err := json.Unmarshal(buf, &temp); err != nil {
 		return err
 	}
 
@@ -1294,66 +1292,66 @@ var _ json.Marshaler = (*LabelComponent)(nil)
 func (c *LabelComponent) MarshalJSON() ([]byte, error) {
 	c.Type = ComponentTypeLabel
 	type NoMethod LabelComponent
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 func UnmarshalComponent(buf []byte) (Component, error) {
 	var meta struct {
 		Type ComponentType `json:"type"`
 	}
-	if err := sonic.Unmarshal(buf, &meta); err != nil {
+	if err := json.Unmarshal(buf, &meta); err != nil {
 		return nil, err
 	}
 
 	switch meta.Type {
 	case ComponentTypeActionRow:
 		var c ActionRowComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeButton:
 		var c ButtonComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeStringSelect:
 		var c StringSelectMenuComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeTextInput:
 		var c TextInputComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeUserSelect:
 		var c UserSelectMenuComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeRoleSelect:
 		var c RoleSelectMenuComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeMentionableSelect:
 		var c MentionableSelectMenuComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeChannelSelect:
 		var c ChannelSelectMenuComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeSection:
 		var c SectionComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeTextDisplay:
 		var c TextDisplayComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeThumbnail:
 		var c ThumbnailComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeMediaGallery:
 		var c MediaGalleryComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeFile:
 		var c FileComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeSeparator:
 		var c SeparatorComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeContainer:
 		var c ContainerComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ComponentTypeLabel:
 		var c LabelComponent
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	default:
 		return nil, errors.New("unknown component type")
 	}
