@@ -17,8 +17,6 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
-
-	"github.com/bytedance/sonic"
 )
 
 // ChannelType represents Discord channel types.
@@ -496,11 +494,12 @@ type CategoryChannel struct {
 
 func (c *CategoryChannel) MarshalJSON() ([]byte, error) {
 	type NoMethod CategoryChannel
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // TextChannel represents a guild text channel.
 type TextChannel struct {
+	EntityBase // Embedded client reference for action methods
 	GuildChannelFields
 	CategorizedChannelFields
 	GuildMessageChannelFields
@@ -510,11 +509,12 @@ type TextChannel struct {
 
 func (c *TextChannel) MarshalJSON() ([]byte, error) {
 	type NoMethod TextChannel
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // VoiceChannel represents a guild voice channel.
 type VoiceChannel struct {
+	EntityBase // Embedded client reference for action methods
 	GuildChannelFields
 	CategorizedChannelFields
 	GuildMessageChannelFields
@@ -524,11 +524,12 @@ type VoiceChannel struct {
 
 func (c *VoiceChannel) MarshalJSON() ([]byte, error) {
 	type NoMethod VoiceChannel
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // AnnouncementChannel represents an announcement channel.
 type AnnouncementChannel struct {
+	EntityBase // Embedded client reference for action methods
 	GuildChannelFields
 	CategorizedChannelFields
 	GuildMessageChannelFields
@@ -538,11 +539,12 @@ type AnnouncementChannel struct {
 
 func (c *AnnouncementChannel) MarshalJSON() ([]byte, error) {
 	type NoMethod AnnouncementChannel
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // StageVoiceChannel represents a stage voice channel.
 type StageVoiceChannel struct {
+	EntityBase // Embedded client reference for action methods
 	GuildChannelFields
 	CategorizedChannelFields
 	GuildMessageChannelFields
@@ -553,11 +555,12 @@ type StageVoiceChannel struct {
 
 func (c *StageVoiceChannel) MarshalJSON() ([]byte, error) {
 	type NoMethod StageVoiceChannel
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // ForumChannel represents a guild forum channel.
 type ForumChannel struct {
+	EntityBase // Embedded client reference for action methods
 	GuildChannelFields
 	CategorizedChannelFields
 	GuildMessageChannelFields
@@ -568,7 +571,7 @@ type ForumChannel struct {
 
 func (c *ForumChannel) MarshalJSON() ([]byte, error) {
 	type NoMethod ForumChannel
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // MediaChannel represents a media channel.
@@ -606,6 +609,7 @@ type ThreadMember struct {
 
 // ThreadChannel represents the base for thread channels.
 type ThreadChannel struct {
+	EntityBase // Embedded client reference for action methods
 	ThreadChannelFields
 	CategorizedChannelFields
 	GuildMessageChannelFields
@@ -617,7 +621,7 @@ type ThreadChannel struct {
 
 func (c *ThreadChannel) MarshalJSON() ([]byte, error) {
 	type NoMethod ThreadChannel
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // DMChannelFields contains fields common to DM and Group DM channels.
@@ -626,8 +630,9 @@ type DMChannelFields struct {
 	MessageChannelFields
 }
 
-// ThreadChannel represents a DM channel between the currect user and other user.
+// DMChannel represents a DM channel between the current user and another user.
 type DMChannel struct {
+	EntityBase // Embedded client reference for action methods
 	DMChannelFields
 	// Recipients is the list of users participating in the group DM channel.
 	//
@@ -638,11 +643,12 @@ type DMChannel struct {
 
 func (c *DMChannel) MarshalJSON() ([]byte, error) {
 	type NoMethod DMChannel
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
-// ThreadChannel represents a DM channel between the currect user and other user.
+// GroupDMChannel represents a group DM channel between multiple users.
 type GroupDMChannel struct {
+	EntityBase // Embedded client reference for action methods
 	DMChannelFields
 	// Icon is the custom icon for the group DM channel.
 	//
@@ -653,7 +659,7 @@ type GroupDMChannel struct {
 
 func (c *GroupDMChannel) MarshalJSON() ([]byte, error) {
 	type NoMethod GroupDMChannel
-	return sonic.Marshal((*NoMethod)(c))
+	return json.Marshal((*NoMethod)(c))
 }
 
 // Channel is the interface representing a Discord channel.
@@ -1066,43 +1072,43 @@ func UnmarshalChannel(buf []byte) (Channel, error) {
 	var meta struct {
 		Type ChannelType `json:"type"`
 	}
-	if err := sonic.Unmarshal(buf, &meta); err != nil {
+	if err := json.Unmarshal(buf, &meta); err != nil {
 		return nil, err
 	}
 
 	switch meta.Type {
 	case ChannelTypeGuildCategory:
 		var c CategoryChannel
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ChannelTypeGuildText:
 		var c TextChannel
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ChannelTypeGuildVoice:
 		var c VoiceChannel
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ChannelTypeGuildAnnouncement:
 		var c AnnouncementChannel
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ChannelTypeGuildStageVoice:
 		var c StageVoiceChannel
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ChannelTypeGuildForum:
 		var c ForumChannel
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ChannelTypeGuildMedia:
 		var c MediaChannel
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ChannelTypeAnnouncementThread,
 		ChannelTypePrivateThread,
 		ChannelTypePublicThread:
 		var c ThreadChannel
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ChannelTypeDM:
 		var c DMChannel
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	case ChannelTypeGroupDM:
 		var c GroupDMChannel
-		return &c, sonic.Unmarshal(buf, &c)
+		return &c, json.Unmarshal(buf, &c)
 	default:
 		return nil, errors.New("unknown channel type")
 	}
@@ -1120,7 +1126,7 @@ func (c *ResolvedChannel) UnmarshalJSON(buf []byte) error {
 	var t struct {
 		Permissions Permissions `json:"permissions"`
 	}
-	if err := sonic.Unmarshal(buf, &t); err != nil {
+	if err := json.Unmarshal(buf, &t); err != nil {
 		return err
 	}
 	c.Permissions = t.Permissions
@@ -1146,7 +1152,7 @@ func (c *ResolvedMessageChannel) UnmarshalJSON(buf []byte) error {
 	var t struct {
 		Permissions Permissions `json:"permissions"`
 	}
-	if err := sonic.Unmarshal(buf, &t); err != nil {
+	if err := json.Unmarshal(buf, &t); err != nil {
 		return err
 	}
 	c.Permissions = t.Permissions
@@ -1321,7 +1327,713 @@ type ChannelCreateOptions struct {
 	// Applies to Channels of Type: Text, Announcement, Forum, Media.
 	DefaultThreadRateLimitPerUser int `json:"default_thread_rate_limit_per_user,omitempty"`
 
-
 	// Reason specifies the audit log reason for creating the channel.
 	Reason string `json:"-"`
+}
+
+/*****************************
+ *  TextChannel Action Methods
+ *****************************/
+
+// Send sends a message to this channel.
+//
+// Usage example:
+//
+//	msg, err := channel.Send("Hello, world!")
+func (c *TextChannel) Send(content string) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Content: content})
+}
+
+// SendWith sends a message with full options to this channel.
+//
+// Usage example:
+//
+//	msg, err := channel.SendWith(MessageCreateOptions{
+//	    Content: "Hello!",
+//	    Embeds: []Embed{embed},
+//	})
+func (c *TextChannel) SendWith(opts MessageCreateOptions) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.SendMessage(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// SendEmbed sends an embed message to this channel.
+//
+// Usage example:
+//
+//	embed := goda.NewEmbedBuilder().SetTitle("Hello").Build()
+//	msg, err := channel.SendEmbed(embed)
+func (c *TextChannel) SendEmbed(embed Embed) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Embeds: []Embed{embed}})
+}
+
+// FetchMessages retrieves messages from this channel.
+//
+// Usage example:
+//
+//	messages, err := channel.FetchMessages(FetchMessagesOptions{Limit: 10})
+func (c *TextChannel) FetchMessages(opts FetchMessagesOptions) ([]*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	messages, err := c.client.FetchMessages(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*Message, len(messages))
+	for i := range messages {
+		messages[i].SetClient(c.client)
+		result[i] = &messages[i]
+	}
+	return result, nil
+}
+
+// FetchMessage retrieves a single message from this channel.
+//
+// Usage example:
+//
+//	msg, err := channel.FetchMessage(messageID)
+func (c *TextChannel) FetchMessage(messageID Snowflake) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.FetchMessage(c.ID, messageID)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// BulkDelete deletes multiple messages from this channel.
+// Messages must be less than 2 weeks old. Between 2 and 100 messages may be deleted.
+//
+// Usage example:
+//
+//	err := channel.BulkDelete(messageIDs, "Cleanup")
+func (c *TextChannel) BulkDelete(messageIDs []Snowflake, reason string) error {
+	if c.client == nil {
+		return ErrNoClient
+	}
+	return c.client.BulkDeleteMessages(c.ID, messageIDs, reason)
+}
+
+// Delete deletes this channel.
+// Requires MANAGE_CHANNELS permission.
+//
+// Usage example:
+//
+//	err := channel.Delete("No longer needed")
+func (c *TextChannel) Delete(reason string) error {
+	if c.client == nil {
+		return ErrNoClient
+	}
+	return c.client.DeleteChannel(c.ID, reason)
+}
+
+// Edit modifies this channel's settings.
+// Requires MANAGE_CHANNELS permission.
+//
+// Usage example:
+//
+//	updated, err := channel.Edit(ChannelEditOptions{Name: "new-name"}, "Renaming")
+func (c *TextChannel) Edit(opts ChannelEditOptions, reason string) (*TextChannel, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	ch, err := c.client.EditChannel(c.ID, opts, reason)
+	if err != nil {
+		return nil, err
+	}
+	tc, ok := ch.(*TextChannel)
+	if !ok {
+		return nil, ErrChannelNotText
+	}
+	tc.SetClient(c.client)
+	return tc, nil
+}
+
+// Guild returns the cached guild this channel belongs to.
+//
+// Usage example:
+//
+//	if guild, ok := channel.Guild(); ok {
+//	    fmt.Println("Guild:", guild.Name)
+//	}
+func (c *TextChannel) Guild() (Guild, bool) {
+	if c.client == nil {
+		return Guild{}, false
+	}
+	return c.client.CacheManager.GetGuild(c.GuildID)
+}
+
+/*****************************
+ *  VoiceChannel Action Methods
+ *****************************/
+
+// Send sends a message to this voice channel.
+func (c *VoiceChannel) Send(content string) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Content: content})
+}
+
+// SendWith sends a message with full options to this voice channel.
+func (c *VoiceChannel) SendWith(opts MessageCreateOptions) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.SendMessage(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// SendEmbed sends an embed message to this voice channel.
+func (c *VoiceChannel) SendEmbed(embed Embed) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Embeds: []Embed{embed}})
+}
+
+// FetchMessages retrieves messages from this voice channel.
+func (c *VoiceChannel) FetchMessages(opts FetchMessagesOptions) ([]*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	messages, err := c.client.FetchMessages(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*Message, len(messages))
+	for i := range messages {
+		messages[i].SetClient(c.client)
+		result[i] = &messages[i]
+	}
+	return result, nil
+}
+
+// FetchMessage retrieves a single message from this voice channel.
+func (c *VoiceChannel) FetchMessage(messageID Snowflake) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.FetchMessage(c.ID, messageID)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// Delete deletes this voice channel.
+func (c *VoiceChannel) Delete(reason string) error {
+	if c.client == nil {
+		return ErrNoClient
+	}
+	return c.client.DeleteChannel(c.ID, reason)
+}
+
+// Edit modifies this voice channel's settings.
+func (c *VoiceChannel) Edit(opts ChannelEditOptions, reason string) (*VoiceChannel, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	ch, err := c.client.EditChannel(c.ID, opts, reason)
+	if err != nil {
+		return nil, err
+	}
+	vc, ok := ch.(*VoiceChannel)
+	if !ok {
+		return nil, ErrChannelNotVoice
+	}
+	vc.SetClient(c.client)
+	return vc, nil
+}
+
+// Guild returns the cached guild this voice channel belongs to.
+func (c *VoiceChannel) Guild() (Guild, bool) {
+	if c.client == nil {
+		return Guild{}, false
+	}
+	return c.client.CacheManager.GetGuild(c.GuildID)
+}
+
+/*****************************
+ *  AnnouncementChannel Action Methods
+ *****************************/
+
+// Send sends a message to this announcement channel.
+func (c *AnnouncementChannel) Send(content string) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Content: content})
+}
+
+// SendWith sends a message with full options to this announcement channel.
+func (c *AnnouncementChannel) SendWith(opts MessageCreateOptions) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.SendMessage(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// SendEmbed sends an embed message to this announcement channel.
+func (c *AnnouncementChannel) SendEmbed(embed Embed) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Embeds: []Embed{embed}})
+}
+
+// FetchMessages retrieves messages from this announcement channel.
+func (c *AnnouncementChannel) FetchMessages(opts FetchMessagesOptions) ([]*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	messages, err := c.client.FetchMessages(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*Message, len(messages))
+	for i := range messages {
+		messages[i].SetClient(c.client)
+		result[i] = &messages[i]
+	}
+	return result, nil
+}
+
+// FetchMessage retrieves a single message from this announcement channel.
+func (c *AnnouncementChannel) FetchMessage(messageID Snowflake) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.FetchMessage(c.ID, messageID)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// BulkDelete deletes multiple messages from this announcement channel.
+func (c *AnnouncementChannel) BulkDelete(messageIDs []Snowflake, reason string) error {
+	if c.client == nil {
+		return ErrNoClient
+	}
+	return c.client.BulkDeleteMessages(c.ID, messageIDs, reason)
+}
+
+// Delete deletes this announcement channel.
+func (c *AnnouncementChannel) Delete(reason string) error {
+	if c.client == nil {
+		return ErrNoClient
+	}
+	return c.client.DeleteChannel(c.ID, reason)
+}
+
+// Edit modifies this announcement channel's settings.
+func (c *AnnouncementChannel) Edit(opts ChannelEditOptions, reason string) (*AnnouncementChannel, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	ch, err := c.client.EditChannel(c.ID, opts, reason)
+	if err != nil {
+		return nil, err
+	}
+	ac, ok := ch.(*AnnouncementChannel)
+	if !ok {
+		return nil, ErrChannelNotAnnouncement
+	}
+	ac.SetClient(c.client)
+	return ac, nil
+}
+
+// Guild returns the cached guild this announcement channel belongs to.
+func (c *AnnouncementChannel) Guild() (Guild, bool) {
+	if c.client == nil {
+		return Guild{}, false
+	}
+	return c.client.CacheManager.GetGuild(c.GuildID)
+}
+
+/*****************************
+ *  StageVoiceChannel Action Methods
+ *****************************/
+
+// Send sends a message to this stage voice channel.
+func (c *StageVoiceChannel) Send(content string) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Content: content})
+}
+
+// SendWith sends a message with full options to this stage voice channel.
+func (c *StageVoiceChannel) SendWith(opts MessageCreateOptions) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.SendMessage(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// SendEmbed sends an embed message to this stage voice channel.
+func (c *StageVoiceChannel) SendEmbed(embed Embed) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Embeds: []Embed{embed}})
+}
+
+// FetchMessages retrieves messages from this stage voice channel.
+func (c *StageVoiceChannel) FetchMessages(opts FetchMessagesOptions) ([]*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	messages, err := c.client.FetchMessages(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*Message, len(messages))
+	for i := range messages {
+		messages[i].SetClient(c.client)
+		result[i] = &messages[i]
+	}
+	return result, nil
+}
+
+// FetchMessage retrieves a single message from this stage voice channel.
+func (c *StageVoiceChannel) FetchMessage(messageID Snowflake) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.FetchMessage(c.ID, messageID)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// Delete deletes this stage voice channel.
+func (c *StageVoiceChannel) Delete(reason string) error {
+	if c.client == nil {
+		return ErrNoClient
+	}
+	return c.client.DeleteChannel(c.ID, reason)
+}
+
+// Edit modifies this stage voice channel's settings.
+func (c *StageVoiceChannel) Edit(opts ChannelEditOptions, reason string) (*StageVoiceChannel, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	ch, err := c.client.EditChannel(c.ID, opts, reason)
+	if err != nil {
+		return nil, err
+	}
+	sc, ok := ch.(*StageVoiceChannel)
+	if !ok {
+		return nil, ErrChannelNotStage
+	}
+	sc.SetClient(c.client)
+	return sc, nil
+}
+
+// Guild returns the cached guild this stage voice channel belongs to.
+func (c *StageVoiceChannel) Guild() (Guild, bool) {
+	if c.client == nil {
+		return Guild{}, false
+	}
+	return c.client.CacheManager.GetGuild(c.GuildID)
+}
+
+/*****************************
+ *  ThreadChannel Action Methods
+ *****************************/
+
+// Send sends a message to this thread.
+func (c *ThreadChannel) Send(content string) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Content: content})
+}
+
+// SendWith sends a message with full options to this thread.
+func (c *ThreadChannel) SendWith(opts MessageCreateOptions) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.SendMessage(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// SendEmbed sends an embed message to this thread.
+func (c *ThreadChannel) SendEmbed(embed Embed) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Embeds: []Embed{embed}})
+}
+
+// FetchMessages retrieves messages from this thread.
+func (c *ThreadChannel) FetchMessages(opts FetchMessagesOptions) ([]*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	messages, err := c.client.FetchMessages(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*Message, len(messages))
+	for i := range messages {
+		messages[i].SetClient(c.client)
+		result[i] = &messages[i]
+	}
+	return result, nil
+}
+
+// FetchMessage retrieves a single message from this thread.
+func (c *ThreadChannel) FetchMessage(messageID Snowflake) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.FetchMessage(c.ID, messageID)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// BulkDelete deletes multiple messages from this thread.
+func (c *ThreadChannel) BulkDelete(messageIDs []Snowflake, reason string) error {
+	if c.client == nil {
+		return ErrNoClient
+	}
+	return c.client.BulkDeleteMessages(c.ID, messageIDs, reason)
+}
+
+// Delete deletes this thread.
+func (c *ThreadChannel) Delete(reason string) error {
+	if c.client == nil {
+		return ErrNoClient
+	}
+	return c.client.DeleteChannel(c.ID, reason)
+}
+
+// Edit modifies this thread's settings.
+func (c *ThreadChannel) Edit(opts ChannelEditOptions, reason string) (*ThreadChannel, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	ch, err := c.client.EditChannel(c.ID, opts, reason)
+	if err != nil {
+		return nil, err
+	}
+	tc, ok := ch.(*ThreadChannel)
+	if !ok {
+		return nil, ErrChannelNotThread
+	}
+	tc.SetClient(c.client)
+	return tc, nil
+}
+
+// Guild returns the cached guild this thread belongs to.
+func (c *ThreadChannel) Guild() (Guild, bool) {
+	if c.client == nil {
+		return Guild{}, false
+	}
+	return c.client.CacheManager.GetGuild(c.GuildID)
+}
+
+/*****************************
+ *  ForumChannel Action Methods
+ *****************************/
+
+// Delete deletes this forum channel.
+func (c *ForumChannel) Delete(reason string) error {
+	if c.client == nil {
+		return ErrNoClient
+	}
+	return c.client.DeleteChannel(c.ID, reason)
+}
+
+// Edit modifies this forum channel's settings.
+func (c *ForumChannel) Edit(opts ChannelEditOptions, reason string) (*ForumChannel, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	ch, err := c.client.EditChannel(c.ID, opts, reason)
+	if err != nil {
+		return nil, err
+	}
+	fc, ok := ch.(*ForumChannel)
+	if !ok {
+		return nil, ErrChannelNotForum
+	}
+	fc.SetClient(c.client)
+	return fc, nil
+}
+
+// Guild returns the cached guild this forum channel belongs to.
+func (c *ForumChannel) Guild() (Guild, bool) {
+	if c.client == nil {
+		return Guild{}, false
+	}
+	return c.client.CacheManager.GetGuild(c.GuildID)
+}
+
+/*****************************
+ *  MediaChannel Action Methods
+ *****************************/
+
+// Delete deletes this media channel.
+func (c *MediaChannel) Delete(reason string) error {
+	if c.client == nil {
+		return ErrNoClient
+	}
+	return c.client.DeleteChannel(c.ID, reason)
+}
+
+// Edit modifies this media channel's settings.
+func (c *MediaChannel) Edit(opts ChannelEditOptions, reason string) (*MediaChannel, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	ch, err := c.client.EditChannel(c.ID, opts, reason)
+	if err != nil {
+		return nil, err
+	}
+	mc, ok := ch.(*MediaChannel)
+	if !ok {
+		return nil, ErrChannelNotMedia
+	}
+	mc.SetClient(c.client)
+	return mc, nil
+}
+
+// Guild returns the cached guild this media channel belongs to.
+func (c *MediaChannel) Guild() (Guild, bool) {
+	if c.client == nil {
+		return Guild{}, false
+	}
+	return c.client.CacheManager.GetGuild(c.GuildID)
+}
+
+/*****************************
+ *  DMChannel Action Methods
+ *****************************/
+
+// Send sends a message to this DM channel.
+func (c *DMChannel) Send(content string) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Content: content})
+}
+
+// SendWith sends a message with full options to this DM channel.
+func (c *DMChannel) SendWith(opts MessageCreateOptions) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.SendMessage(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// SendEmbed sends an embed message to this DM channel.
+func (c *DMChannel) SendEmbed(embed Embed) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Embeds: []Embed{embed}})
+}
+
+// FetchMessages retrieves messages from this DM channel.
+func (c *DMChannel) FetchMessages(opts FetchMessagesOptions) ([]*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	messages, err := c.client.FetchMessages(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*Message, len(messages))
+	for i := range messages {
+		messages[i].SetClient(c.client)
+		result[i] = &messages[i]
+	}
+	return result, nil
+}
+
+// FetchMessage retrieves a single message from this DM channel.
+func (c *DMChannel) FetchMessage(messageID Snowflake) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.FetchMessage(c.ID, messageID)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+/*****************************
+ *  GroupDMChannel Action Methods
+ *****************************/
+
+// Send sends a message to this group DM channel.
+func (c *GroupDMChannel) Send(content string) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Content: content})
+}
+
+// SendWith sends a message with full options to this group DM channel.
+func (c *GroupDMChannel) SendWith(opts MessageCreateOptions) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.SendMessage(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
+}
+
+// SendEmbed sends an embed message to this group DM channel.
+func (c *GroupDMChannel) SendEmbed(embed Embed) (*Message, error) {
+	return c.SendWith(MessageCreateOptions{Embeds: []Embed{embed}})
+}
+
+// FetchMessages retrieves messages from this group DM channel.
+func (c *GroupDMChannel) FetchMessages(opts FetchMessagesOptions) ([]*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	messages, err := c.client.FetchMessages(c.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	result := make([]*Message, len(messages))
+	for i := range messages {
+		messages[i].SetClient(c.client)
+		result[i] = &messages[i]
+	}
+	return result, nil
+}
+
+// FetchMessage retrieves a single message from this group DM channel.
+func (c *GroupDMChannel) FetchMessage(messageID Snowflake) (*Message, error) {
+	if c.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := c.client.FetchMessage(c.ID, messageID)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(c.client)
+	return &msg, nil
 }
