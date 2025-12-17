@@ -18,7 +18,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/bytedance/sonic"
+	"encoding/json"
 )
 
 /***********************
@@ -100,7 +100,7 @@ func (r *restApi) FetchGatewayBot() (GatewayBot, error) {
 	}
 
 	var obj GatewayBot
-	if err := sonic.Unmarshal(body, &obj); err != nil {
+	if err := json.Unmarshal(body, &obj); err != nil {
 		r.logger.Error("Failed parsing response for /gateway/bot: " + err.Error())
 		return GatewayBot{}, err
 	}
@@ -127,7 +127,7 @@ func (r *restApi) FetchSelfUser() (User, error) {
 	}
 
 	var obj User
-	if err := sonic.Unmarshal(body, &obj); err != nil {
+	if err := json.Unmarshal(body, &obj); err != nil {
 		r.logger.Error("Failed parsing response for /users/@me: " + err.Error())
 		return User{}, err
 	}
@@ -151,7 +151,7 @@ func (r *restApi) FetchSelfUser() (User, error) {
 // Returns:
 //   - error: if the request failed.
 func (r *restApi) UpdateSelfUser(opts UpdateSelfUserOptions) error {
-	body, _ := sonic.Marshal(opts)
+	body, _ := json.Marshal(opts)
 	_, err := r.doRequest("PATCH", "/users/@me", body, true, "")
 	return err
 }
@@ -176,7 +176,7 @@ func (r *restApi) FetchUser(userID Snowflake) (User, error) {
 	}
 
 	var obj User
-	if err := sonic.Unmarshal(body, &obj); err != nil {
+	if err := json.Unmarshal(body, &obj); err != nil {
 		r.logger.Error("Failed parsing response for /users/{id}: " + err.Error())
 		return User{}, err
 	}
@@ -221,7 +221,7 @@ func (r *restApi) FetchChannel(channelID Snowflake) (Channel, error) {
 //   - Message: the message object.
 //   - error: if the request or decoding failed.
 func (r *restApi) SendMessage(channelID Snowflake, opts MessageCreateOptions) (Message, error) {
-	reqBody, err := sonic.Marshal(opts)
+	reqBody, err := json.Marshal(opts)
 	body, err := r.doRequest("POST", "/channels/"+channelID.String()+"/messages", reqBody, true, "")
 
 	var message Message
@@ -230,7 +230,7 @@ func (r *restApi) SendMessage(channelID Snowflake, opts MessageCreateOptions) (M
 		return message, err
 	}
 
-	err = sonic.Unmarshal(body, message)
+	err = json.Unmarshal(body, message)
 	if err != nil {
 		return message, err
 	}
