@@ -13,7 +13,7 @@
 
 package goda
 
-import "github.com/bytedance/sonic"
+import "encoding/json"
 
 /*****************************
  *   READY Handler
@@ -28,7 +28,7 @@ type readyHandlers struct {
 // handleEvent parses the READY event data and calls each registered handler.
 func (h *readyHandlers) handleEvent(cache CacheManager, shardID int, data []byte) {
 	evt := ReadyEvent{ShardsID: shardID}
-	if err := sonic.Unmarshal(data, &evt); err != nil {
+	if err := json.Unmarshal(data, &evt); err != nil {
 		h.logger.Error("readyHandlers: Failed parsing event data")
 		return
 	}
@@ -63,7 +63,7 @@ type guildCreateHandlers struct {
 func (h *guildCreateHandlers) handleEvent(cache CacheManager, shardID int, data []byte) {
 	evt := GuildCreateEvent{ShardsID: shardID}
 
-	if err := sonic.Unmarshal(data, &evt.Guild); err != nil {
+	if err := json.Unmarshal(data, &evt.Guild); err != nil {
 		h.logger.Error("guildCreateHandlers: Failed parsing event data")
 		return
 	}
@@ -120,7 +120,7 @@ type messageCreateHandlers struct {
 func (h *messageCreateHandlers) handleEvent(cache CacheManager, shardID int, data []byte) {
 	evt := MessageCreateEvent{ShardsID: shardID}
 
-	if err := sonic.Unmarshal(data, &evt.Message); err != nil {
+	if err := json.Unmarshal(data, &evt.Message); err != nil {
 		h.logger.Error("messageCreateHandlers: Failed parsing event data")
 		return
 	}
@@ -154,7 +154,7 @@ type messageDeleteHandlers struct {
 // handleEvent parses the MESSAGE_DELETE event data and calls each registered handler.
 func (h *messageDeleteHandlers) handleEvent(cache CacheManager, shardID int, data []byte) {
 	evt := MessageDeleteEvent{ShardsID: shardID}
-	if err := sonic.Unmarshal(data, &evt.Message); err != nil {
+	if err := json.Unmarshal(data, &evt.Message); err != nil {
 		h.logger.Error("messageDeleteHandlers: Failed parsing event data")
 		return
 	}
@@ -189,7 +189,7 @@ type messageUpdateHandlers struct {
 // handleEvent parses the MESSAGE_UPDATE event data and calls each registered handler.
 func (h *messageUpdateHandlers) handleEvent(cache CacheManager, shardID int, data []byte) {
 	evt := MessageUpdateEvent{ShardsID: shardID}
-	if err := sonic.Unmarshal(data, &evt.NewMessage); err != nil {
+	if err := json.Unmarshal(data, &evt.NewMessage); err != nil {
 		h.logger.Error("messageUpdateHandlers: Failed parsing event data")
 		return
 	}
@@ -234,7 +234,7 @@ type interactionCreateHandlers struct {
 // handleEvent parses the INTERACTION_CREATE event data and calls each registered handler.
 func (h *interactionCreateHandlers) handleEvent(cache CacheManager, shardID int, data []byte) {
 	evt := InteractionCreateEvent{ShardsID: shardID}
-	if err := sonic.Unmarshal(data, &evt); err != nil {
+	if err := json.Unmarshal(data, &evt); err != nil {
 		h.logger.Error("interactionCreateHandlers: Failed parsing event data")
 		return
 	}
@@ -264,7 +264,7 @@ type voiceStateUpdateHandlers struct {
 // handleEvent parses the VOICE_STATE_UPDATE event data and calls each registered handler.
 func (h *voiceStateUpdateHandlers) handleEvent(cache CacheManager, shardID int, data []byte) {
 	evt := VoiceStateUpdateEvent{ShardsID: shardID}
-	if err := sonic.Unmarshal(data, &evt.NewState); err != nil {
+	if err := json.Unmarshal(data, &evt.NewState); err != nil {
 		h.logger.Error("voiceStateCreateHandlers: Failed parsing event data")
 		return
 	}
