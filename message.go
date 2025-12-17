@@ -18,8 +18,6 @@ import (
 	"encoding/json"
 	"strconv"
 	"time"
-
-	"github.com/bytedance/sonic"
 )
 
 // MessageType represents the type of a message on Discord.
@@ -829,6 +827,8 @@ type EmbedField struct {
 //
 // Reference: https://discord.com/developers/docs/resources/message#message-object
 type Message struct {
+	EntityBase // Embedded client reference for action methods
+
 	// ID is the unique Discord snowflake ID of the message.
 	ID Snowflake `json:"id"`
 
@@ -1006,7 +1006,7 @@ func (m *Message) UnmarshalJSON(buf []byte) error {
 		Components []json.RawMessage `json:"components"`
 		tempMessage
 	}
-	if err := sonic.Unmarshal(buf, &temp); err != nil {
+	if err := json.Unmarshal(buf, &temp); err != nil {
 		return err
 	}
 	*m = Message(temp.tempMessage)
@@ -1188,4 +1188,227 @@ func (b *EmbedBuilder) RemoveField(i int) *EmbedBuilder {
 // Build returns the final Embed object ready to send.
 func (b *EmbedBuilder) Build() Embed {
 	return b.embed
+}
+
+/*****************************
+ *   Message Action Methods  *
+ *****************************/
+
+// Reply sends a reply to this message.
+// Returns the new message that was sent.
+//
+// Usage example:
+//
+//	reply, err := message.Reply("Hello!")
+func (m *Message) Reply(content string) (*Message, error) {
+	return m.ReplyWith(MessageCreateOptions{Content: content})
+}
+
+// ReplyWith sends a reply with full message options.
+// Returns the new message that was sent.
+//
+// Usage example:
+//
+//	reply, err := message.ReplyWith(MessageCreateOptions{
+//	    Content: "Hello!",
+//	    Embeds: []Embed{embed},
+//	})
+func (m *Message) ReplyWith(opts MessageCreateOptions) (*Message, error) {
+	if m.client == nil {
+		return nil, ErrNoClient
+	}
+	opts.MessageReference = &MessageReference{MessageID: m.ID}
+	msg, err := m.client.SendMessage(m.ChannelID, opts)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(m.client)
+	return &msg, nil
+}
+
+// ReplyEmbed sends an embed as a reply to this message.
+// Returns the new message that was sent.
+//
+// Usage example:
+//
+//	embed := goda.NewEmbedBuilder().SetTitle("Hello").Build()
+//	reply, err := message.ReplyEmbed(embed)
+func (m *Message) ReplyEmbed(embed Embed) (*Message, error) {
+	return m.ReplyWith(MessageCreateOptions{Embeds: []Embed{embed}})
+}
+
+// Edit edits this message's content.
+// Returns the updated message.
+//
+// Usage example:
+//
+//	updated, err := message.Edit("New content")
+func (m *Message) Edit(content string) (*Message, error) {
+	return m.EditWith(MessageEditOptions{Content: content})
+}
+
+// EditWith edits this message with full options.
+// Returns the updated message.
+//
+// Usage example:
+//
+//	updated, err := message.EditWith(MessageEditOptions{
+//	    Content: "New content",
+//	    Embeds: []Embed{embed},
+//	})
+func (m *Message) EditWith(opts MessageEditOptions) (*Message, error) {
+	if m.client == nil {
+		return nil, ErrNoClient
+	}
+	msg, err := m.client.EditMessage(m.ChannelID, m.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(m.client)
+	return &msg, nil
+}
+
+// Delete deletes this message.
+//
+// Usage example:
+//
+//	err := message.Delete()
+func (m *Message) Delete() error {
+	return m.DeleteWithReason("")
+}
+
+// DeleteWithReason deletes this message with an audit log reason.
+//
+// Usage example:
+//
+//	err := message.DeleteWithReason("Spam")
+func (m *Message) DeleteWithReason(reason string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	return m.client.DeleteMessage(m.ChannelID, m.ID, reason)
+}
+
+// React adds a reaction to this message.
+// The emoji can be a unicode emoji or a custom emoji in the format "name:id".
+//
+// Usage example:
+//
+//	err := message.React("👍")
+//	err := message.React("custom_emoji:123456789")
+func (m *Message) React(emoji string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	return m.client.CreateReaction(m.ChannelID, m.ID, emoji)
+}
+
+// RemoveReaction removes the bot's reaction from this message.
+//
+// Usage example:
+//
+//	err := message.RemoveReaction("👍")
+func (m *Message) RemoveReaction(emoji string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	return m.client.DeleteOwnReaction(m.ChannelID, m.ID, emoji)
+}
+
+// Pin pins this message in its channel.
+// Requires MANAGE_MESSAGES permission.
+//
+// Usage example:
+//
+//	err := message.Pin()
+func (m *Message) Pin() error {
+	return m.PinWithReason("")
+}
+
+// PinWithReason pins this message with an audit log reason.
+//
+// Usage example:
+//
+//	err := message.PinWithReason("Important announcement")
+func (m *Message) PinWithReason(reason string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	return m.client.PinMessage(m.ChannelID, m.ID, reason)
+}
+
+// Unpin unpins this message from its channel.
+// Requires MANAGE_MESSAGES permission.
+//
+// Usage example:
+//
+//	err := message.Unpin()
+func (m *Message) Unpin() error {
+	return m.UnpinWithReason("")
+}
+
+// UnpinWithReason unpins this message with an audit log reason.
+//
+// Usage example:
+//
+//	err := message.UnpinWithReason("No longer relevant")
+func (m *Message) UnpinWithReason(reason string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	return m.client.UnpinMessage(m.ChannelID, m.ID, reason)
+}
+
+// FetchChannel fetches and returns the channel this message was sent in.
+// This makes an API call; for cached channels, use Channel() instead.
+//
+// Usage example:
+//
+//	channel, err := message.FetchChannel()
+func (m *Message) FetchChannel() (Channel, error) {
+	if m.client == nil {
+		return nil, ErrNoClient
+	}
+	return m.client.FetchChannel(m.ChannelID)
+}
+
+// Channel returns the cached channel this message was sent in.
+// Returns nil if the channel is not in cache or if the message has no client.
+//
+// Usage example:
+//
+//	if ch, ok := message.Channel(); ok {
+//	    fmt.Println("Channel:", ch.GetName())
+//	}
+func (m *Message) Channel() (Channel, bool) {
+	if m.client == nil {
+		return nil, false
+	}
+	return m.client.CacheManager.GetChannel(m.ChannelID)
+}
+
+// Guild returns the cached guild this message was sent in.
+// Returns nil if the message was sent in a DM or if the guild is not in cache.
+//
+// Usage example:
+//
+//	if g, ok := message.Guild(); ok {
+//	    fmt.Println("Guild:", g.Name)
+//	}
+func (m *Message) Guild() (Guild, bool) {
+	if m.client == nil || m.GuildID.UnSet() {
+		return Guild{}, false
+	}
+	return m.client.CacheManager.GetGuild(m.GuildID)
+}
+
+// InGuild returns true if this message was sent in a guild (not a DM).
+//
+// Usage example:
+//
+//	if message.InGuild() {
+//	    // Handle guild message
+//	}
+func (m *Message) InGuild() bool {
+	return !m.GuildID.UnSet()
 }
