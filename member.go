@@ -70,6 +70,8 @@ func (f MemberFlags) Has(flags ...MemberFlags) bool {
 
 // Member is a discord GuildMember
 type Member struct {
+	EntityBase // Embedded client reference for action methods
+
 	// ID is the user's unique Discord snowflake ID.
 	ID Snowflake `json:"id"`
 
@@ -264,4 +266,195 @@ type ResolvedMember struct {
 	Member
 	// Permissions is the total permissions of the member in the channel, including overwrites.
 	Permissions Permissions `json:"permissions,omitempty"`
+}
+
+/*****************************
+ *   Member Action Methods   *
+ *****************************/
+
+// Kick removes this member from the guild.
+// Requires KICK_MEMBERS permission.
+//
+// Usage example:
+//
+//	err := member.Kick("Rule violation")
+func (m *Member) Kick(reason string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	return m.client.KickMember(m.GuildID, m.User.ID, reason)
+}
+
+// Ban bans this member from the guild.
+// Requires BAN_MEMBERS permission.
+//
+// Usage example:
+//
+//	err := member.Ban(BanOptions{DeleteMessageSeconds: 86400}, "Severe violation")
+func (m *Member) Ban(opts BanOptions, reason string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	return m.client.BanMember(m.GuildID, m.User.ID, opts, reason)
+}
+
+// Edit modifies this member's attributes.
+// Returns the updated member.
+//
+// Usage example:
+//
+//	nick := "New Nickname"
+//	updated, err := member.Edit(MemberEditOptions{Nick: &nick}, "Nickname change")
+func (m *Member) Edit(opts MemberEditOptions, reason string) (*Member, error) {
+	if m.client == nil {
+		return nil, ErrNoClient
+	}
+	updated, err := m.client.EditMember(m.GuildID, m.User.ID, opts, reason)
+	if err != nil {
+		return nil, err
+	}
+	updated.SetClient(m.client)
+	return &updated, nil
+}
+
+// SetNickname sets this member's nickname.
+// Pass an empty string to remove the nickname.
+//
+// Usage example:
+//
+//	err := member.SetNickname("Cool Guy", "Requested nickname change")
+func (m *Member) SetNickname(nickname string, reason string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	_, err := m.client.EditMember(m.GuildID, m.User.ID, MemberEditOptions{Nick: &nickname}, reason)
+	return err
+}
+
+// AddRole adds a role to this member.
+// Requires MANAGE_ROLES permission.
+//
+// Usage example:
+//
+//	err := member.AddRole(roleID, "Earned the role")
+func (m *Member) AddRole(roleID Snowflake, reason string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	return m.client.AddMemberRole(m.GuildID, m.User.ID, roleID, reason)
+}
+
+// RemoveRole removes a role from this member.
+// Requires MANAGE_ROLES permission.
+//
+// Usage example:
+//
+//	err := member.RemoveRole(roleID, "Role revoked")
+func (m *Member) RemoveRole(roleID Snowflake, reason string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	return m.client.RemoveMemberRole(m.GuildID, m.User.ID, roleID, reason)
+}
+
+// Timeout applies a timeout to this member for the specified duration.
+// Requires MODERATE_MEMBERS permission. Maximum duration is 28 days.
+//
+// Usage example:
+//
+//	err := member.Timeout(10*time.Minute, "Spam")
+func (m *Member) Timeout(duration time.Duration, reason string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	return m.client.TimeoutMember(m.GuildID, m.User.ID, duration, reason)
+}
+
+// RemoveTimeout removes the timeout from this member.
+// Requires MODERATE_MEMBERS permission.
+//
+// Usage example:
+//
+//	err := member.RemoveTimeout("Timeout lifted")
+func (m *Member) RemoveTimeout(reason string) error {
+	if m.client == nil {
+		return ErrNoClient
+	}
+	return m.client.RemoveTimeout(m.GuildID, m.User.ID, reason)
+}
+
+// Send sends a direct message to this member.
+// Returns the sent message.
+//
+// Usage example:
+//
+//	msg, err := member.Send("Hello!")
+func (m *Member) Send(content string) (*Message, error) {
+	return m.SendWith(MessageCreateOptions{Content: content})
+}
+
+// SendWith sends a direct message to this member with full options.
+// Returns the sent message.
+//
+// Usage example:
+//
+//	msg, err := member.SendWith(MessageCreateOptions{
+//	    Content: "Hello!",
+//	    Embeds: []Embed{embed},
+//	})
+func (m *Member) SendWith(opts MessageCreateOptions) (*Message, error) {
+	if m.client == nil {
+		return nil, ErrNoClient
+	}
+	dm, err := m.client.CreateDM(m.User.ID)
+	if err != nil {
+		return nil, err
+	}
+	msg, err := m.client.SendMessage(dm.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(m.client)
+	return &msg, nil
+}
+
+// Guild returns the cached guild this member belongs to.
+//
+// Usage example:
+//
+//	if g, ok := member.Guild(); ok {
+//	    fmt.Println("Guild:", g.Name)
+//	}
+func (m *Member) Guild() (Guild, bool) {
+	if m.client == nil {
+		return Guild{}, false
+	}
+	return m.client.CacheManager.GetGuild(m.GuildID)
+}
+
+// HasRole checks if this member has a specific role.
+//
+// Usage example:
+//
+//	if member.HasRole(moderatorRoleID) {
+//	    // Member is a moderator
+//	}
+func (m *Member) HasRole(roleID Snowflake) bool {
+	for _, id := range m.RoleIDs {
+		if id == roleID {
+			return true
+		}
+	}
+	return false
+}
+
+// IsTimedOut returns true if this member is currently timed out.
+//
+// Usage example:
+//
+//	if member.IsTimedOut() {
+//	    // Member is timed out
+//	}
+func (m *Member) IsTimedOut() bool {
+	return m.CommunicationDisabledUntil != nil && m.CommunicationDisabledUntil.After(time.Now())
 }
