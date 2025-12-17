@@ -20,7 +20,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/bytedance/sonic"
+	"encoding/json"
 	"github.com/gobwas/ws"
 	"github.com/gobwas/ws/wsutil"
 )
@@ -178,7 +178,7 @@ func (s *Shard) readLoop() {
 		}
 
 		var payload gatewayPayload
-		if err := sonic.Unmarshal(msg, &payload); err != nil {
+		if err := json.Unmarshal(msg, &payload); err != nil {
 			s.logger.Error("Shard " + strconv.Itoa(s.shardID) + " unmarshal error: " + err.Error())
 			continue
 		}
@@ -193,7 +193,7 @@ func (s *Shard) readLoop() {
 					SessionID string `json:"session_id"`
 					ResumeURL string `json:"resume_gateway_url"`
 				}
-				sonic.Unmarshal(payload.D, &ready)
+				json.Unmarshal(payload.D, &ready)
 				s.sessionID = ready.SessionID
 				s.resumeURL = ready.ResumeURL
 				s.logger.Debug("Shard " + strconv.Itoa(s.shardID) + " session established")
@@ -205,7 +205,7 @@ func (s *Shard) readLoop() {
 
 		case gatewayOpcodeInvalidSession:
 			var resumable bool
-			sonic.Unmarshal(payload.D, &resumable)
+			json.Unmarshal(payload.D, &resumable)
 			time.Sleep(time.Second)
 			if resumable {
 				s.logger.Info("Shard " + strconv.Itoa(s.shardID) + " session invalid (resumable), resuming")
@@ -221,7 +221,7 @@ func (s *Shard) readLoop() {
 			var hello struct {
 				HeartbeatInterval float64 `json:"heartbeat_interval"`
 			}
-			sonic.Unmarshal(payload.D, &hello)
+			json.Unmarshal(payload.D, &hello)
 			interval := time.Duration(hello.HeartbeatInterval) * time.Millisecond
 			s.logger.Debug("Shard " + strconv.Itoa(s.shardID) + " HELLO received, heartbeat " + interval.String())
 			go s.startHeartbeat(interval)
@@ -251,7 +251,7 @@ func (s *Shard) readLoop() {
 //
 // Identify payloads are rate limited via identifyLimiter.
 func (s *Shard) sendIdentify() error {
-	payload, _ := sonic.Marshal(map[string]any{
+	payload, _ := json.Marshal(map[string]any{
 		"op": gatewayOpcodeIdentify,
 		"d": map[string]any{
 			"token": s.token,
@@ -272,7 +272,7 @@ func (s *Shard) sendIdentify() error {
 //
 // This attempts to resume a previous session using sessionID and sequence number.
 func (s *Shard) sendResume() error {
-	payload, _ := sonic.Marshal(map[string]any{
+	payload, _ := json.Marshal(map[string]any{
 		"op": gatewayOpcodeResume,
 		"d": map[string]any{
 			"token":      s.token,
@@ -287,7 +287,7 @@ func (s *Shard) sendResume() error {
 //
 // The payload data is the last sequence number received.
 func (s *Shard) sendHeartbeat() error {
-	payload, _ := sonic.Marshal(map[string]any{
+	payload, _ := json.Marshal(map[string]any{
 		"op": gatewayOpcodeHeartbeat,
 		"d":  atomic.LoadInt64(&s.seq),
 	})
