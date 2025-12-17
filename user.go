@@ -178,6 +178,8 @@ func (t UserPremiumType) Is(premiumType UserPremiumType) bool {
 //
 // Reference: https://discord.com/developers/docs/resources/user#user-object-user-structure
 type User struct {
+	EntityBase // Embedded client reference for action methods
+
 	// ID is the user's unique Discord snowflake ID.
 	ID Snowflake `json:"id"`
 
@@ -462,4 +464,111 @@ type UpdateSelfUserOptions struct {
 	// 		// handler err
 	//  }
 	Banner Base64Image `json:"banner,omitempty"`
+}
+
+/*****************************
+ *    User Action Methods    *
+ *****************************/
+
+// Send sends a direct message to this user.
+// Returns the sent message.
+//
+// Usage example:
+//
+//	msg, err := user.Send("Hello!")
+func (u *User) Send(content string) (*Message, error) {
+	return u.SendWith(MessageCreateOptions{Content: content})
+}
+
+// SendWith sends a direct message to this user with full options.
+// Returns the sent message.
+//
+// Usage example:
+//
+//	msg, err := user.SendWith(MessageCreateOptions{
+//	    Content: "Hello!",
+//	    Embeds: []Embed{embed},
+//	})
+func (u *User) SendWith(opts MessageCreateOptions) (*Message, error) {
+	if u.client == nil {
+		return nil, ErrNoClient
+	}
+	dm, err := u.client.CreateDM(u.ID)
+	if err != nil {
+		return nil, err
+	}
+	msg, err := u.client.SendMessage(dm.ID, opts)
+	if err != nil {
+		return nil, err
+	}
+	msg.SetClient(u.client)
+	return &msg, nil
+}
+
+// SendEmbed sends an embed as a direct message to this user.
+// Returns the sent message.
+//
+// Usage example:
+//
+//	embed := goda.NewEmbedBuilder().SetTitle("Hello").Build()
+//	msg, err := user.SendEmbed(embed)
+func (u *User) SendEmbed(embed Embed) (*Message, error) {
+	return u.SendWith(MessageCreateOptions{Embeds: []Embed{embed}})
+}
+
+// Fetch fetches fresh user data from the API.
+// Returns a new User object with updated data.
+//
+// Usage example:
+//
+//	freshUser, err := user.Fetch()
+func (u *User) Fetch() (*User, error) {
+	if u.client == nil {
+		return nil, ErrNoClient
+	}
+	fetched, err := u.client.FetchUser(u.ID)
+	if err != nil {
+		return nil, err
+	}
+	fetched.SetClient(u.client)
+	return &fetched, nil
+}
+
+// CreateDM creates or retrieves a DM channel with this user.
+// Returns the DM channel.
+//
+// Usage example:
+//
+//	dm, err := user.CreateDM()
+func (u *User) CreateDM() (*DMChannel, error) {
+	if u.client == nil {
+		return nil, ErrNoClient
+	}
+	dm, err := u.client.CreateDM(u.ID)
+	if err != nil {
+		return nil, err
+	}
+	return &dm, nil
+}
+
+// IsBot returns true if this user is a bot account.
+//
+// Usage example:
+//
+//	if user.IsBot() {
+//	    // User is a bot
+//	}
+func (u *User) IsBot() bool {
+	return u.Bot
+}
+
+// IsSystem returns true if this user is an official Discord system user.
+//
+// Usage example:
+//
+//	if user.IsSystem() {
+//	    // User is a Discord system user
+//	}
+func (u *User) IsSystem() bool {
+	return u.System
 }
