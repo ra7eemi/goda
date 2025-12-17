@@ -18,8 +18,6 @@ import (
 	"encoding/json"
 	"errors"
 	"time"
-
-	"github.com/bytedance/sonic"
 )
 
 // VerificationLevel represents the verification level required on a Discord guild.
@@ -300,6 +298,8 @@ type GuildIncidentsData struct {
 //
 // Reference: https://discord.com/developers/docs/resources/guild
 type Guild struct {
+	EntityBase // Embedded client reference for action methods
+
 	// ID is the guild's unique Discord snowflake ID.
 	ID Snowflake `json:"id"`
 
@@ -449,6 +449,27 @@ type Guild struct {
 	// Optional:
 	//  - May be nil if guild has no incidents data.
 	IncidentsData *GuildIncidentsData `json:"incidents_data"`
+
+	// Channels is the guild's channel manager.
+	// Provides access to cached channels and channel operations.
+	//
+	// Note:
+	//  - This field is not serialized and is populated by the library.
+	Channels *GuildChannelManager `json:"-"`
+
+	// Members is the guild's member manager.
+	// Provides access to cached members and member operations.
+	//
+	// Note:
+	//  - This field is not serialized and is populated by the library.
+	Members *GuildMemberManager `json:"-"`
+
+	// Roles is the guild's role manager.
+	// Provides access to cached roles and role operations.
+	//
+	// Note:
+	//  - This field is not serialized and is populated by the library.
+	RolesManager *GuildRoleManager `json:"-"`
 }
 
 // CreatedAt returns the time when this guild is created.
@@ -646,7 +667,7 @@ func (g *GatewayGuild) UnmarshalJSON(buf []byte) error {
 	}
 
 	var temp tempGuild
-	if err := sonic.Unmarshal(buf, &temp); err != nil {
+	if err := json.Unmarshal(buf, &temp); err != nil {
 		return err
 	}
 
