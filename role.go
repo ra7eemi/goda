@@ -92,6 +92,8 @@ type RoleColors struct {
 //
 // Reference: https://discord.com/developers/docs/resources/guild#role-object-role-structure
 type Role struct {
+	EntityBase // Embedded client reference for action methods
+
 	// ID is the role ID.
 	ID Snowflake `json:"id"`
 
@@ -180,4 +182,134 @@ func (u *Role) IconURLWith(format ImageFormat, size ImageSize) string {
 		return RoleIconURL(u.ID, u.Icon, format, size)
 	}
 	return ""
+}
+
+/*****************************
+ *    Role Action Methods    *
+ *****************************/
+
+// Edit modifies this role's attributes.
+// Returns the updated role.
+// Requires MANAGE_ROLES permission.
+//
+// Usage example:
+//
+//	updated, err := role.Edit(RoleEditOptions{Name: "New Name"}, "Renaming role")
+func (r *Role) Edit(opts RoleEditOptions, reason string) (*Role, error) {
+	if r.client == nil {
+		return nil, ErrNoClient
+	}
+	updated, err := r.client.EditRole(r.GuildID, r.ID, opts, reason)
+	if err != nil {
+		return nil, err
+	}
+	updated.SetClient(r.client)
+	return &updated, nil
+}
+
+// Delete deletes this role from the guild.
+// Requires MANAGE_ROLES permission.
+//
+// Usage example:
+//
+//	err := role.Delete("Role no longer needed")
+func (r *Role) Delete(reason string) error {
+	if r.client == nil {
+		return ErrNoClient
+	}
+	return r.client.DeleteRole(r.GuildID, r.ID, reason)
+}
+
+// SetName changes this role's name.
+// Requires MANAGE_ROLES permission.
+//
+// Usage example:
+//
+//	err := role.SetName("Moderator", "Renaming role")
+func (r *Role) SetName(name string, reason string) error {
+	if r.client == nil {
+		return ErrNoClient
+	}
+	_, err := r.client.EditRole(r.GuildID, r.ID, RoleEditOptions{Name: name}, reason)
+	return err
+}
+
+// SetColor changes this role's color.
+// Requires MANAGE_ROLES permission.
+//
+// Usage example:
+//
+//	err := role.SetColor(0x3498db, "New color")
+func (r *Role) SetColor(color Color, reason string) error {
+	if r.client == nil {
+		return ErrNoClient
+	}
+	_, err := r.client.EditRole(r.GuildID, r.ID, RoleEditOptions{Color: &color}, reason)
+	return err
+}
+
+// SetHoist sets whether this role is displayed separately in the member list.
+// Requires MANAGE_ROLES permission.
+//
+// Usage example:
+//
+//	err := role.SetHoist(true, "Display role separately")
+func (r *Role) SetHoist(hoist bool, reason string) error {
+	if r.client == nil {
+		return ErrNoClient
+	}
+	_, err := r.client.EditRole(r.GuildID, r.ID, RoleEditOptions{Hoist: &hoist}, reason)
+	return err
+}
+
+// SetMentionable sets whether this role can be mentioned.
+// Requires MANAGE_ROLES permission.
+//
+// Usage example:
+//
+//	err := role.SetMentionable(true, "Allow mentions")
+func (r *Role) SetMentionable(mentionable bool, reason string) error {
+	if r.client == nil {
+		return ErrNoClient
+	}
+	_, err := r.client.EditRole(r.GuildID, r.ID, RoleEditOptions{Mentionable: &mentionable}, reason)
+	return err
+}
+
+// Guild returns the cached guild this role belongs to.
+//
+// Usage example:
+//
+//	if g, ok := role.Guild(); ok {
+//	    fmt.Println("Guild:", g.Name)
+//	}
+func (r *Role) Guild() (Guild, bool) {
+	if r.client == nil {
+		return Guild{}, false
+	}
+	return r.client.CacheManager.GetGuild(r.GuildID)
+}
+
+// IsEveryone returns true if this is the @everyone role.
+// The @everyone role ID is the same as the guild ID.
+//
+// Usage example:
+//
+//	if role.IsEveryone() {
+//	    // This is the @everyone role
+//	}
+func (r *Role) IsEveryone() bool {
+	return r.ID == r.GuildID
+}
+
+// IsManaged returns true if this role is managed by an integration (bot, boosts, etc).
+// Managed roles cannot be manually assigned or modified.
+//
+// Usage example:
+//
+//	if role.IsManaged() {
+//	    // Cannot manually assign this role
+//	}
+func (r *Role) IsManaged() bool {
+	return r.Managed
 }
