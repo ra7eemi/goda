@@ -69,69 +69,55 @@ func (f MemberFlags) Has(flags ...MemberFlags) bool {
 }
 
 // Member is a discord GuildMember
+//
+// NOTE: Fields are ordered for optimal memory alignment (largest to smallest)
+// to minimize struct padding and improve cache efficiency.
 type Member struct {
-	EntityBase // Embedded client reference for action methods
-
-	// ID is the user's unique Discord snowflake ID.
-	ID Snowflake `json:"id"`
-
-	// GuildID is the member's guild id.
-	GuildID Snowflake `json:"guild_id"`
-
+	// Large embedded struct first for alignment
 	// User is the member's user object.
 	User User `json:"user"`
 
-	// Nickname is the user's nickname.
-	Nickname string `json:"nick"`
+	EntityBase // Embedded client reference for action methods (pointer, 8 bytes)
 
-	// Avatar is the member's avatar hash.
-	// Note:
-	//  - this is difrent from the user avatar, this one is spesific to this guild
-	//
-	// Optional:
-	//  - May be empty string if no avatar.
-	Avatar string `json:"avatar"`
+	// Snowflakes (uint64, 8 bytes each)
+	// ID is the user's unique Discord snowflake ID.
+	ID Snowflake `json:"id"`
+	// GuildID is the member's guild id.
+	GuildID Snowflake `json:"guild_id"`
 
-	// Banner is the member's banner hash.
-	// Note:
-	//  - this is difrent from the user banner, this one is spesific to this guild
-	//
-	// Optional:
-	//  - May be empty string if no banner.
-	Banner string `json:"banner"`
+	// Pointers (8 bytes each)
+	// JoinedAt when the user joined the guild
+	JoinedAt *time.Time `json:"joined_at"`
+	// PremiumSince when the user started boosting the guild
+	PremiumSince *time.Time `json:"premium_since,omitempty"`
+	// CommunicationDisabledUntil is when the user's timeout will expire
+	CommunicationDisabledUntil *time.Time `json:"communication_disabled_until"`
+	// AvatarDecorationData is the data for the member's guild avatar decoration
+	AvatarDecorationData *AvatarDecorationData `json:"avatar_decoration_data"`
 
+	// Slice header (24 bytes)
 	// RoleIDs is the ids of roles this member have
 	RoleIDs []Snowflake `json:"roles,omitempty"`
 
-	// JoinedAt when the user joined the guild
-	//
-	// Optional:
-	//  - Nil in VoiceStateUpdate event if the member was invited as a guest.
-	JoinedAt *time.Time `json:"joined_at"`
+	// Strings (24 bytes each)
+	// Nickname is the user's nickname.
+	Nickname string `json:"nick"`
+	// Avatar is the member's avatar hash (guild-specific).
+	Avatar string `json:"avatar"`
+	// Banner is the member's banner hash (guild-specific).
+	Banner string `json:"banner"`
 
-	// PremiumSince when the user started boosting the guild
-	//
-	// Optional:
-	//  - Nil if member is not a server booster
-	PremiumSince *time.Time `json:"premium_since,omitempty"`
-
-	// Deaf is whether the user is deafened in voice channels
-	Deaf bool `json:"deaf,omitempty"`
-
-	// Mute is whether the user is muted in voice channels
-	Mute bool `json:"mute,omitempty"`
-
+	// Int (8 bytes on 64-bit)
 	// Flags guild member flags represented as a bit set, defaults to 0
 	Flags MemberFlags `json:"flags"`
 
+	// Bools (1 byte each, grouped at end)
+	// Deaf is whether the user is deafened in voice channels
+	Deaf bool `json:"deaf,omitempty"`
+	// Mute is whether the user is muted in voice channels
+	Mute bool `json:"mute,omitempty"`
 	// Pending is whether the user has not yet passed the guild's Membership Screening requirements
 	Pending bool `json:"pending"`
-
-	// CommunicationDisabledUntil is when the user's timeout will expire and the user will be able to communicate in the guild again, null or a time in the past if the user is not timed out
-	CommunicationDisabledUntil *time.Time `json:"communication_disabled_until"`
-
-	// AvatarDecorationData is the data for the member's guild avatar decoration
-	AvatarDecorationData *AvatarDecorationData `json:"avatar_decoration_data"`
 }
 
 // Mention returns a Discord mention string for the user.
