@@ -177,74 +177,48 @@ func (t UserPremiumType) Is(premiumType UserPremiumType) bool {
 // User represents a Discord user object.
 //
 // Reference: https://discord.com/developers/docs/resources/user#user-object-user-structure
+//
+// NOTE: Fields are ordered for optimal memory alignment (largest to smallest)
+// to minimize struct padding and improve cache efficiency.
 type User struct {
-	EntityBase // Embedded client reference for action methods
+	EntityBase // Embedded client reference for action methods (pointer, 8 bytes)
 
 	// ID is the user's unique Discord snowflake ID.
-	ID Snowflake `json:"id"`
+	ID Snowflake `json:"id"` // uint64, 8 bytes
 
-	// Username is the user's username (not unique).
-	Username string `json:"username"`
-
-	// Discriminator is the user's 4-digit Discord tag suffix.
-	Discriminator string `json:"discriminator"`
-
-	// GlobalName is the user's display name.
-	// For bots, this is the application name.
-	//
-	// Optional:
-	//  - May be empty string if unset.
-	GlobalName string `json:"global_name"`
-
-	// Avatar is the user's avatar hash.
-	//
-	// Optional:
-	//  - May be empty string if no avatar.
-	Avatar string `json:"avatar"`
-
-	// Bot indicates if the user is a bot account.
-	Bot bool `json:"bot,omitempty"`
-
-	// System indicates if the user is an official Discord system user.
-	System bool `json:"system,omitempty"`
-
-	// Banner is the user's banner hash.
-	//
-	// Optional:
-	//  - May be empty string if no banner.
-	Banner string `json:"banner"`
-
+	// Pointers (8 bytes each, grouped for alignment)
+	// AvatarDecorationData holds avatar decoration info.
+	AvatarDecorationData *AvatarDecorationData `json:"avatar_decoration_data,omitempty"`
+	// Collectibles holds user's collectibles.
+	Collectibles *Collectibles `json:"collectibles,omitempty"`
+	// PrimaryGuild holds the user's primary guild info.
+	PrimaryGuild *UserPrimaryGuild `json:"primary_guild,omitempty"`
 	// AccentColor is the user's banner color encoded as an integer.
-	//
-	// Optional:
-	//  - May be nil if no accent color is set.
 	AccentColor *Color `json:"accent_color"`
 
+	// Strings (24 bytes each: ptr + len + cap)
+	// Username is the user's username (not unique).
+	Username string `json:"username"`
+	// Discriminator is the user's 4-digit Discord tag suffix.
+	Discriminator string `json:"discriminator"`
+	// GlobalName is the user's display name. For bots, this is the application name.
+	GlobalName string `json:"global_name"`
+	// Avatar is the user's avatar hash.
+	Avatar string `json:"avatar"`
+	// Banner is the user's banner hash.
+	Banner string `json:"banner"`
+
+	// Ints (8 bytes on 64-bit)
 	// PremiumType is the Nitro subscription type.
 	PremiumType UserPremiumType `json:"premium_type,omitempty"`
-
 	// PublicFlags are the public flags on the user account.
 	PublicFlags UserFlags `json:"public_flags,omitempty"`
 
-	// AvatarDecorationData holds avatar decoration info.
-	//
-	// Optional:
-	//  - May be nil if user has no avatar decoration.
-	AvatarDecorationData *AvatarDecorationData `json:"avatar_decoration_data,omitempty"`
-
-	// Collectibles holds user's collectibles.
-	//
-	// Optional:
-	//  - May be nil if user has no collectibles.
-	Collectibles *Collectibles `json:"collectibles,omitempty"`
-
-	// PrimaryGuild holds the user's primary guild info.
-	//
-	// Optional:
-	// - May be nil if user is a bot.
-	// - May be nil if no primary guild set.
-	// - May be nil if identity cleared due to guild tag or privacy settings.
-	PrimaryGuild *UserPrimaryGuild `json:"primary_guild,omitempty"`
+	// Bools (1 byte each, grouped at end to minimize padding)
+	// Bot indicates if the user is a bot account.
+	Bot bool `json:"bot,omitempty"`
+	// System indicates if the user is an official Discord system user.
+	System bool `json:"system,omitempty"`
 }
 
 type OAuth2User struct {
